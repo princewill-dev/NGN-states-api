@@ -1,41 +1,43 @@
-# Use an official Python runtime as a parent image
-FROM python:3.8
+# Use specific Python version
+FROM python:3.8.10
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y postgresql postgresql-contrib nginx
+# Install PostgreSQL from official repo 
+RUN apt-get update && apt-get install -y wget gnupg2 lsb-release
 
-# Set environment variables for PostgreSQL
-ENV POSTGRES_DB=server_001
-ENV POSTGRES_USER=server_001
-ENV POSTGRES_PASSWORD=server_001
+# Add PostgreSQL's third party repository
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
 
-# Set the working directory
-WORKDIR /app
+# Import the repository signing key
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
-# Copy the entire project to the container
-COPY . /app
+# Update the package lists
+RUN apt-get update
 
-#upgrade pip
-RUN pip install --upgrade pip
+# Install PostgreSQL 14 and PostgreSQL client
+RUN apt-get -y install postgresql-14 postgresql-client-14
 
-# Install dependencies for Django
-RUN pip install --no-cache-dir -r /app/django/requirements.txt
+# Set env vars together   
+ENV POSTGRES_DB=server_001 \
+    POSTGRES_USER=server_001 \
+    POSTGRES_PASSWORD=server_001
 
-# PostgreSQL setup
-RUN service postgresql start && \
-    su - postgres -c "psql -c 'CREATE DATABASE server_001;'" && \
-    su - postgres -c "psql -c 'CREATE USER server_001 WITH PASSWORD '\''server_001'\'';'" && \
-    su - postgres -c "psql -c 'ALTER ROLE server_001 SET client_encoding TO '\''utf8'\'';'" && \
-    su - postgres -c "psql -c 'ALTER ROLE server_001 SET default_transaction_isolation TO '\''read committed'\'';'" && \
-    su - postgres -c "psql -c 'ALTER ROLE server_001 SET timezone TO '\''UTC'\'';'" && \
-    service postgresql stop
+# Set working directory
+WORKDIR /app 
 
-# Clean up
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Copy and set permissions
+COPY --chown=myuser:mygroup . /app
+
+COPY ./requirements.txt /app/requirements.txt
+
+# Install dependencies 
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r /app/requirements.txt
+
+# Collect static files
+RUN python /app/manage.py collectstatic --noinput
 
 # Expose ports
-EXPOSE 80
-EXPOSE 8000
+EXPOSE 80 5432 8000
 
-# Start Django application
-CMD ["python", "/app/django/manage.py", "runserver", "0.0.0.0:8000"]
+# Start app server
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "myapp.wsgi"]
