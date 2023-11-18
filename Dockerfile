@@ -15,6 +15,9 @@ WORKDIR /app
 # Copy the entire project to the container
 COPY . /app
 
+#upgrade pip
+RUN pip install --upgrade pip
+
 # Install dependencies for Django
 RUN pip install --no-cache-dir -r /app/django/requirements.txt
 
