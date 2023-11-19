@@ -28,6 +28,7 @@ RUN python /app/manage.py collectstatic --noinput
 ENV POSTGRES_DB=server_001
 ENV POSTGRES_USER=server_001
 ENV POSTGRES_PASSWORD=server_001
+ENV POSTGRES_HOST=postgres
 
 ENV SECRET_KEY = 'django-insecure-zdjbo02g9pu)87h+c_o1fu_(yp()@cb9tu(cf1*ob-x^-u&pi-'
 
