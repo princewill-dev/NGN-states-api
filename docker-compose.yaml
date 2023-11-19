@@ -2,7 +2,7 @@ version: '3'
 
 services:
   postgres:
-    image: postgres
+    image: postgres:latest
     environment:
       POSTGRES_DB: server_001
       POSTGRES_USER: server_001
@@ -11,6 +11,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
 
   django:
     build:
@@ -24,10 +26,10 @@ services:
       - .:/app
     command: ["python", "/app/manage.py", "runserver", "0.0.0.0:8000"]
     networks:
-      - default
+      - backend-network
 
 volumes:
   postgres_data:
 
 networks:
-  default:
+  backend-network:
