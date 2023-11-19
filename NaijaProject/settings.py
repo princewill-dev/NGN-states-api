@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'stateapi',
     'rest_framework',
     'corsheaders',
+    'whitenoise.runserver_nostatic',
 ]
 
 REST_FRAMEWORK = {
@@ -69,6 +70,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'NaijaProject.urls'
