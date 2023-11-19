@@ -33,7 +33,6 @@ CORS_ORIGIN_ALLOW_ALL = True
 CSRF_COOKIE_SECURE = True
 
 CORS_ALLOWED_ORIGINS = [
-    "https://nigerian-states-production.up.railway.app",
     "https://princewill.pro",
 ]
 
