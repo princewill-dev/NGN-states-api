@@ -1,39 +1,13 @@
-# Use specific Python version
-FROM python:3.8-slim-buster
+FROM python:3.10.12
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1 
+WORKDIR /app  
 
-# Set working directory
-WORKDIR /app 
+COPY . .  
 
-RUN apt-get update \
-  && apt-get install -y postgresql-client gcc python3-dev 
+RUN apt update && apt install -y python3-pip
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+RUN pip install -r requirements.txt
 
-COPY ./manage.py /app/manage.py
+EXPOSE 8000  
 
-COPY ./requirements.txt /app/requirements.txt
-
-# Install dependencies 
-RUN pip install --upgrade pip
-
-RUN pip install --no-cache-dir -r /app/requirements.txt
-
-# Collect static files
-RUN python /app/manage.py collectstatic --noinput
-
-ENV POSTGRES_DB=server_001
-ENV POSTGRES_USER=server_001
-ENV POSTGRES_PASSWORD=server_001
-ENV POSTGRES_HOST=postgres
-
-ENV SECRET_KEY = 'django-insecure-zdjbo02g9pu)87h+c_o1fu_(yp()@cb9tu(cf1*ob-x^-u&pi-'
-
-# Expose ports
-EXPOSE 80 5432 8000
-
-# Start app server
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "NaijaProject.wsgi"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
